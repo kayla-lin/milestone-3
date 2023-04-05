@@ -1,0 +1,71 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url = env("DATABASE_URL")
+}
+
+// Migrates model to database
+// npx prisma migrate dev --name init
+
+model Role {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(256)
+  user User[] 
+}
+
+model User {
+  userID Int @default(autoincrement()) @id
+  name String @db.VarChar(256)
+  email String @unique @db.VarChar(256)
+  password String @db.VarChar(256)
+  createdAt DateTime
+  roleID Int
+  role Role @relation(fields: [roleID], references: [id], onDelete: NoAction, onUpdate: Cascade)
+  coursesInstructed Course[]
+  studentCourses StudentCourse[]
+  studentProjects StudentProject[]
+}
+
+model Course {
+  courseID Int @default(autoincrement()) @id
+  name String @db.VarChar(256)
+  location String @db.VarChar(256)
+  instructorID Int
+  instructor User @relation(fields: [instructorID], references: [userID], onDelete: Cascade, onUpdate: Cascade)
+  projects Project[]
+  studentCourses StudentCourse[]
+}
+
+model Project {
+  projectID Int @default(autoincrement()) @id
+  name String @db.VarChar(256)
+  dueDate DateTime
+  description String @db.VarChar(256)
+  courseID Int
+  course Course @relation(fields: [courseID], references: [courseID], onDelete: Cascade, onUpdate: Cascade)
+  studentProjects StudentProject[]
+}
+
+model StudentProject {
+  userID Int
+  projectID Int
+  priority String? @db.VarChar(256)
+  status String? @db.VarChar(256)
+  completedDate DateTime?
+  project Project @relation(fields: [projectID], references: [projectID], onDelete: Cascade, onUpdate: Cascade)
+  user User @relation(fields: [userID], references: [userID], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([userID, projectID], map: "user_id_project_id_unique")
+}
+
+model StudentCourse {
+  userID Int
+  courseID Int
+  user User @relation(fields: [userID], references: [userID], onDelete: Cascade, onUpdate: Cascade)
+  course Course @relation(fields: [courseID], references: [courseID], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([userID, courseID], map: "user_id_course_id_unique")
+}
