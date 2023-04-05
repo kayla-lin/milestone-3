@@ -55,7 +55,7 @@ npx prisma migrate dev --name init
 
 7. Load in the role tables with ID 1 being instructor and ID 2 being student. Sign in requires that these tables are here for referential integrity.
 
-8. Run the development server then do to [http://localhost:3000/](http://localhost:3000/)
+8. Run the development server, go to [http://localhost:3000/](http://localhost:3000/)
 
 ```
 npm run dev
