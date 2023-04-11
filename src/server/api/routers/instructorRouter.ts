@@ -151,17 +151,25 @@ export const instructorRouter = createTRPCRouter({
   getAllInstructorCourse: protectedProcedure.query(async (req) => {
     const { session } = req.ctx;
     const instructorID = Number(session.user.id);
-    const result: CourseInfo[] = await prisma.$queryRaw(
-      Prisma.sql`
+    console.log(instructorID);
+    try {
+      const result: CourseInfo[] = await prisma.$queryRaw(
+        Prisma.sql`
         select c.courseID, c.name as courseName, c.location, u.name as instructorName, count(p.courseID) as numProjects, count(sc.courseID) as numEnrolled
-        from course c
+        from Course c
         left join Project p on c.courseID = p.courseID
         left join StudentCourse sc on sc.courseID = p.courseID
-        left join user u on c.instructorID = u.userID
+        left join User u on c.instructorID = u.userID
         where c.instructorID = ${instructorID}
-        group by c.courseID;    `
-    );
-    return result;
+        group by c.courseID;`
+      );
+      return result;
+    } catch (e) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "couldn't find courses",
+      });
+    }
   }),
   viewInstructorCourse: protectedProcedure
     .input(z.object({ courseID: z.number() }))
@@ -175,7 +183,7 @@ export const instructorRouter = createTRPCRouter({
         from course c
         left join Project p on c.courseID = p.courseID
         left join StudentCourse sc on sc.courseID = c.courseID 
-        left join user u on c.instructorID = u.userID
+        left join User u on c.instructorID = u.userID
         where c.courseID = ${courseID}
         group by c.courseID;`
       );

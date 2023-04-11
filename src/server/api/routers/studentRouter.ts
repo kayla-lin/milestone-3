@@ -22,10 +22,10 @@ export const studentRouter = createTRPCRouter({
     const allCourses: CourseInfo[] = await prisma.$queryRaw(
       Prisma.sql`
         select c.courseID, c.name as courseName, c.location, u.name as instructorName, count(p.courseID) as numProjects, count(sc.courseID) as numEnrolled
-        from course c
+        from Course c
         left join Project p on c.courseID = p.courseID
         left join StudentCourse sc on sc.courseID = c.courseID
-        left join user u on c.instructorID = u.userID
+        left join User u on c.instructorID = u.userID
         group by c.courseID;    `
     );
 
